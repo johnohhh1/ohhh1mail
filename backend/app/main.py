@@ -239,12 +239,14 @@ async def sync_emails(
                         
                         # Parse the date from IMAP format
                         from email.utils import parsedate_to_datetime
+                        from datetime import datetime, timezone
                         try:
                             received_date = parsedate_to_datetime(email_data['date'])
-                        except:
-                            # Fallback to current time if parsing fails
-                            from datetime import datetime
-                            received_date = datetime.now()
+                            if received_date.tzinfo is None:
+                                received_date = received_date.replace(tzinfo=timezone.utc)
+                        except Exception as e:
+                            # Fallback to current time with UTC timezone
+                            received_date = datetime.now(timezone.utc)
                         
                         # Check if email already exists by message-id
                         existing = await db.execute(
@@ -268,7 +270,6 @@ async def sync_emails(
                                 ai_category="primary"
                             )
                             db.add(new_email)
-                            await db.commit()  # Commit immediately
                             synced_count += 1
                             
                 except Exception as e:
@@ -278,6 +279,8 @@ async def sync_emails(
                     await db.rollback()
                     continue
         
+        # Commit all at once
+        await db.commit()
         return {"message": f"Sync complete. Imported {synced_count} new emails."}
     except Exception as e:
         await db.rollback()

@@ -19,7 +19,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     if (!token) {
       router.push('/');
       return;
@@ -32,7 +32,7 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem('token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
-      
+
       const response = await fetch(
         `${apiUrl}/emails?category=${activeView}&search=${searchQuery}`,
         {
@@ -57,7 +57,7 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem('token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
-      
+
       await fetch(`${apiUrl}/emails/sync`, {
         method: 'POST',
         headers: {
@@ -110,6 +110,7 @@ export default function Dashboard() {
             onSelectEmail={setSelectedEmail}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            selectedEmailId={selectedEmail?.id}
           />
         )}
       </div>

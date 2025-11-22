@@ -19,6 +19,7 @@ interface EmailListProps {
   onSelectEmail: (email: Email) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  selectedEmailId?: number;
 }
 
 export default function EmailList({
@@ -26,6 +27,7 @@ export default function EmailList({
   onSelectEmail,
   searchQuery,
   onSearchChange,
+  selectedEmailId
 }: EmailListProps) {
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -33,71 +35,77 @@ export default function EmailList({
     const diff = now.getTime() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
 
-    if (hours < 1) return 'Just now';
-    if (hours < 24) return `${hours}h ago`;
-    if (hours < 48) return '1d ago';
-    return `${Math.floor(hours / 24)}d ago`;
+    if (hours < 24) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    if (hours < 48) return 'Yesterday';
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-full bg-white">
       {/* Search Bar */}
-      <div className="bg-white border-b border-gray-200 p-4">
+      <div className="px-4 py-3 border-b border-gray-100">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search emails..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-4 py-1.5 bg-gray-50 border-none rounded-md text-sm focus:ring-1 focus:ring-gray-200 focus:bg-white transition-all placeholder-gray-400"
           />
         </div>
       </div>
 
       {/* Email List */}
-      <div className="flex-1 overflow-y-auto bg-white">
+      <div className="flex-1 overflow-y-auto">
         {emails.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-500">
-            No emails found. Try syncing your inbox!
+          <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <div className="text-sm">No emails found</div>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-50">
             {emails.map((email) => (
               <div
                 key={email.id}
                 onClick={() => onSelectEmail(email)}
-                className={`p-4 hover:bg-gray-50 cursor-pointer transition ${
-                  email.is_read ? '' : 'bg-blue-50'
-                }`}
+                className={`group flex items-center px-4 py-3 cursor-pointer transition-colors ${selectedEmailId === email.id
+                    ? 'bg-blue-50/50'
+                    : 'hover:bg-gray-50'
+                  } ${!email.is_read ? 'bg-white' : 'bg-gray-50/30'}`}
               >
-                <div className="flex items-start justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`font-semibold ${
-                        email.is_read ? 'text-gray-700' : 'text-gray-900'
-                      }`}
-                    >
-                      {email.from_name || email.from_address}
-                    </span>
-                    {email.is_starred && (
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                    )}
-                  </div>
-                  <span className="text-sm text-gray-500">
+                {/* Sender */}
+                <div className={`w-48 flex-shrink-0 truncate text-sm ${!email.is_read ? 'font-semibold text-gray-900' : 'text-gray-700'
+                  }`}>
+                  {email.from_name || email.from_address}
+                </div>
+
+                {/* Subject & Preview */}
+                <div className="flex-1 min-w-0 mx-4 flex items-center text-sm">
+                  <span className={`truncate ${!email.is_read ? 'font-medium text-gray-900' : 'text-gray-700'
+                    }`}>
+                    {email.subject}
+                  </span>
+                  <span className="mx-2 text-gray-300">-</span>
+                  <span className="truncate text-gray-500">
+                    {email.preview}
+                  </span>
+                  {email.ai_summary && (
+                    <Sparkles className="w-3 h-3 text-purple-400 ml-2 flex-shrink-0" />
+                  )}
+                </div>
+
+                {/* Date & Actions */}
+                <div className="flex-shrink-0 flex items-center gap-3 pl-2">
+                  <span className={`text-xs ${!email.is_read ? 'text-blue-600 font-medium' : 'text-gray-400'
+                    }`}>
                     {formatTime(email.received_at)}
                   </span>
+                  {email.is_starred && (
+                    <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                  )}
                 </div>
-                <div className={`text-sm mb-2 ${email.is_read ? '' : 'font-medium'}`}>
-                  {email.subject}
-                </div>
-                {email.ai_summary && (
-                  <div className="flex items-start gap-2 text-sm text-gray-600 mb-2">
-                    <Sparkles className="w-4 h-4 text-purple-500 flex-shrink-0 mt-0.5" />
-                    <span className="italic">{email.ai_summary}</span>
-                  </div>
-                )}
-                <div className="text-sm text-gray-500 truncate">{email.preview}</div>
               </div>
             ))}
           </div>

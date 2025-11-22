@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Zap, Users, Star, Mail, Send, Settings, RefreshCw } from 'lucide-react';
+import { Zap, Users, Star, Mail, Send, Settings, RefreshCw, Inbox } from 'lucide-react';
 
 interface SidebarProps {
-  activeView: string;
-  onViewChange: (view: string) => void;
-  onCompose: () => void;
-  onSync: () => void;
+  activeView?: string;
+  onViewChange?: (view: string) => void;
+  onCompose?: () => void;
+  onSync?: () => void;
 }
 
 export default function Sidebar({ activeView, onViewChange, onCompose, onSync }: SidebarProps) {
@@ -33,7 +33,7 @@ export default function Sidebar({ activeView, onViewChange, onCompose, onSync }:
       if (res.ok) {
         const data = await res.json();
         console.log(data.message);
-        onSync(); // Trigger parent refresh
+        onSync?.(); // Trigger parent refresh
       }
     } catch (error) {
       console.error('Sync failed:', error);
@@ -46,7 +46,7 @@ export default function Sidebar({ activeView, onViewChange, onCompose, onSync }:
     <div className="w-64 bg-gray-50 h-screen flex flex-col border-r border-gray-200">
       <div className="p-4">
         <button
-          onClick={onCompose}
+          onClick={() => onCompose?.()}
           className="w-full bg-white hover:bg-gray-50 text-gray-900 font-semibold py-3 px-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-center gap-2 transition-all"
         >
           <span className="text-xl font-light text-blue-600">+</span>
@@ -56,13 +56,20 @@ export default function Sidebar({ activeView, onViewChange, onCompose, onSync }:
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-2 space-y-1">
+          <Link
+            href="/inbox"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          >
+            <Inbox className="w-4 h-4 text-gray-500" />
+            Inbox
+          </Link>
           {categories.map((category) => {
             const Icon = category.icon;
             const isActive = activeView === category.id;
             return (
               <button
                 key={category.id}
-                onClick={() => onViewChange(category.id)}
+                onClick={() => onViewChange?.(category.id)}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${isActive
                   ? 'bg-gray-200 text-gray-900 font-medium'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'

@@ -1,0 +1,35 @@
+# Core
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-socketio==5.11.0
+
+# Database
+sqlalchemy==2.0.25
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# Celery
+celery==5.3.6
+redis==5.0.1
+
+# Email
+imapclient==3.0.1
+aiosmtplib==3.0.1
+email-validator==2.1.0
+
+# AI - FIXED VERSION
+httpx==0.25.2
+ollama==0.1.7
+
+# Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-multipart==0.0.6
+cryptography==41.0.7
+
+# Utils
+python-dotenv==1.0.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
